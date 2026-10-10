@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 深色底上加深色会糊成一团，这里换成亮一档的同色系 -->
+    <color name="income">#FF81C784</color>
+    <color name="expense">#FFEF9A9A</color>
+
+    <color name="chart_grid">#33FFFFFF</color>
+    <color name="chart_axis_text">#99FFFFFF</color>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 收入 / 支出配色。深色模式在 values-night/colors.xml 里覆盖为更亮的色阶。 -->
+    <color name="income">#FF2E7D32</color>
+    <color name="expense">#FFD32F2F</color>
+
+    <!-- 汇总卡片里的结余：正数用收入色、负数用支出色 -->
+    <color name="balance_positive">@color/income</color>
+    <color name="balance_negative">@color/expense</color>
+
+    <!-- 图表网格与坐标轴文字 -->
+    <color name="chart_grid">#1F000000</color>
+    <color name="chart_axis_text">#99000000</color>
+</resources>

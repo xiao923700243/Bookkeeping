@@ -1,0 +1,60 @@
+<resources>
+    <string name="app_name">记账本</string>
+
+    <!-- 列表页 -->
+    <string name="summary_today_income">今日收入</string>
+    <string name="summary_today_expense">今日支出</string>
+    <string name="summary_balance">结余</string>
+    <string name="empty_records">还没有记账记录\n点右下角 + 记一笔</string>
+    <!-- 金额前缀。收入恒为 +、支出恒为 -，结余按正负取其一 -->
+    <string name="amount_positive">+%1$s</string>
+    <string name="amount_negative">-%1$s</string>
+    <string name="action_stats">统计</string>
+    <string name="action_add">新增记录</string>
+    <string name="cd_delete_record">删除这条记录</string>
+    <string name="deleted">已删除</string>
+
+    <!-- 录入页 -->
+    <string name="title_add">新增记录</string>
+    <string name="title_edit">编辑记录</string>
+    <string name="type_expense">支出</string>
+    <string name="type_income">收入</string>
+    <string name="label_amount">金额</string>
+    <string name="hint_amount">0.00</string>
+    <string name="label_remark">备注</string>
+    <string name="hint_remark">可选，例如：午餐</string>
+    <string name="label_time">时间</string>
+    <string name="action_pick_datetime">选择日期和时间</string>
+    <string name="date_today">今天</string>
+    <string name="date_yesterday">昨天</string>
+    <string name="date_before_yesterday">前天</string>
+    <string name="date_custom">自选</string>
+    <string name="action_save">保存</string>
+    <string name="action_delete">删除</string>
+    <string name="action_cancel">取消</string>
+    <string name="saved_expense">已记录支出 %1$s</string>
+    <string name="saved_income">已记录收入 %1$s</string>
+    <string name="saved_updated">已保存 %1$s</string>
+
+    <!-- 删除确认 -->
+    <string name="delete_confirm_title">删除这条记录？</string>
+    <string name="delete_confirm_message">删除后无法恢复。</string>
+
+    <!-- 错误提示 -->
+    <string name="error_amount_invalid">请输入大于 0 的金额</string>
+    <string name="error_save_failed">保存失败，请重试</string>
+    <string name="error_operation_failed">操作失败，请重试</string>
+    <string name="error_record_missing">记录不存在或已被删除</string>
+
+    <!-- 统计页 -->
+    <string name="period_day">天</string>
+    <string name="period_week">周</string>
+    <string name="period_month">月</string>
+    <string name="period_year">年</string>
+    <string name="stats_total_income">总收入</string>
+    <string name="stats_total_expense">总支出</string>
+    <string name="stats_balance">结余</string>
+    <string name="legend_income">收入</string>
+    <string name="legend_expense">支出</string>
+    <string name="empty_stats">这个区间还没有数据</string>
+</resources>
