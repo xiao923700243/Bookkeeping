@@ -17,8 +17,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/app_name" />
 
-    <!-- 今日汇总。记账场景是「每天记一笔」，所以列表页只看当天；
-         跨周期的趋势去统计页看。 -->
+    <!-- 按天汇总。列表页一次只看一天，跨周期的趋势去统计页看。
+         日期由第一行的箭头切换，默认今天。 -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSummary"
         android:layout_width="0dp"
@@ -35,80 +35,144 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="20dp">
+            android:orientation="vertical"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="20dp">
 
+            <!-- 日期翻页栏。右箭头在今天时由 Activity 置灰并吞掉点击。
+                 中间整块可点，弹日期选择器直达任意一天——只能一天天翻的话，
+                 想看三周前要点 21 下。日历图标是必需的：不加它没人知道这块能点。 -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/summary_today_income"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorOnPrimaryContainer" />
+                <ImageButton
+                    android:id="@+id/btnPrevDay"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/action_prev_day"
+                    android:src="@drawable/ic_chevron_left"
+                    app:tint="?attr/colorOnPrimaryContainer" />
 
-                <TextView
-                    android:id="@+id/textTodayIncome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="@color/income"
-                    tools:text="+3,200.00" />
+                <LinearLayout
+                    android:id="@+id/btnPickDay"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textDay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        tools:text="10-09 昨天" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="6dp"
+                        android:contentDescription="@string/action_pick_day"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="?attr/colorOnPrimaryContainer" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btnNextDay"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/action_next_day"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="?attr/colorOnPrimaryContainer" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_marginTop="4dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/summary_today_expense"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorOnPrimaryContainer" />
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textTodayExpense"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/summary_income"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnPrimaryContainer" />
+
+                    <TextView
+                        android:id="@+id/textDayIncome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/income"
+                        tools:text="+3,200.00" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="@color/expense"
-                    tools:text="-5,480.00" />
-            </LinearLayout>
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/summary_expense"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnPrimaryContainer" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/textDayExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/expense"
+                        tools:text="-5,480.00" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/summary_balance"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorOnPrimaryContainer" />
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textTodayBalance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    tools:text="-2,280.00" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/summary_balance"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnPrimaryContainer" />
+
+                    <TextView
+                        android:id="@+id/textDayBalance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        tools:text="-2,280.00" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -127,14 +191,14 @@
         app:layout_constraintTop_toBottomOf="@id/cardSummary"
         tools:listitem="@layout/item_record" />
 
-    <!-- 空态盖在列表上，避免列表为空时页面只剩一条汇总卡片 -->
+    <!-- 空态盖在列表上，避免列表为空时页面只剩一条汇总卡片。
+         文案带所选日期，由 Activity 运行时填，所以这里不给 android:text。 -->
     <TextView
         android:id="@+id/textEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:lineSpacingExtra="6dp"
-        android:text="@string/empty_records"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"
@@ -142,6 +206,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/listRecords"
+        tools:text="昨天 还没有记录\n点右下角 + 记一笔"
         tools:visibility="visible" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

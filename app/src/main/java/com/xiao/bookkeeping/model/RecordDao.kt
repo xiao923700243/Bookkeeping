@@ -27,19 +27,35 @@ class RecordDao(context: Context) {
     fun delete(id: Long): Int =
         helper.writableDatabase.delete(TABLE, "$COL_ID = ?", arrayOf(id.toString()))
 
-    /** 全部记录，按时间倒序（列表页用）。 */
-    fun queryAll(): List<Record> = query(null, null, "$COL_TIME DESC")
-
     fun queryById(id: Long): Record? =
         query("$COL_ID = ?", arrayOf(id.toString()), null).firstOrNull()
 
-    /** 统计用：取 `[startMs, endMs)` 区间内的记录，按时间正序。 */
-    fun queryBetween(startMs: Long, endMs: Long): List<Record> =
+    /**
+     * 取 `[startMs, endMs)` 区间内的记录。
+     *
+     * 统计页按正序分桶，列表页要最新的在上，所以留一个排序开关。
+     */
+    fun queryBetween(startMs: Long, endMs: Long, descending: Boolean = false): List<Record> =
         query(
             "$COL_TIME >= ? AND $COL_TIME < ?",
             arrayOf(startMs.toString(), endMs.toString()),
-            "$COL_TIME ASC"
+            if (descending) "$COL_TIME DESC" else "$COL_TIME ASC"
         )
+
+    /**
+     * 最早一条记录的时间，库里没有记录时返回 null。
+     *
+     * 年档要决定「历年」从哪年开始，翻到没有数据的年份没有意义。
+     */
+    fun queryEarliestTime(): Long? {
+        val cursor = helper.readableDatabase.rawQuery(
+            "SELECT MIN($COL_TIME) FROM $TABLE", null
+        )
+        return cursor.use { c ->
+            // MIN 在没有行时返回一行 NULL，不能只看 moveToFirst
+            if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null
+        }
+    }
 
     private fun query(selection: String?, args: Array<String>?, orderBy: String?): List<Record> {
         val cursor = helper.readableDatabase.query(

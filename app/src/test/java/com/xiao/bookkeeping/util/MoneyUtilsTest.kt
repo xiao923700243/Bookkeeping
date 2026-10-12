@@ -63,4 +63,22 @@ class MoneyUtilsTest {
             assertEquals(amount, roundTripped, 0.0001)
         }
     }
+
+    @Test
+    fun `compact formatting rounds to whole yuan below ten thousand`() {
+        assertEquals("0", MoneyUtils.formatCompact(0.0))
+        assertEquals("150", MoneyUtils.formatCompact(150.0))
+        assertEquals("150", MoneyUtils.formatCompact(150.4))
+        assertEquals("151", MoneyUtils.formatCompact(150.5))
+        // 四位数不换算，格子里「1234」比「0.1万」好认
+        assertEquals("1234", MoneyUtils.formatCompact(1234.0))
+        assertEquals("9999", MoneyUtils.formatCompact(9999.4))
+    }
+
+    @Test
+    fun `compact formatting switches to ten thousands at the boundary`() {
+        assertEquals("1.0万", MoneyUtils.formatCompact(10_000.0))
+        assertEquals("1.5万", MoneyUtils.formatCompact(15_000.0))
+        assertEquals("12.3万", MoneyUtils.formatCompact(123_456.0))
+    }
 }

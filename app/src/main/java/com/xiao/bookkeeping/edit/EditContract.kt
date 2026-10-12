@@ -39,8 +39,13 @@ interface EditContract {
 
         fun detach()
 
-        /** [recordId] 为 null 表示新增。 */
-        fun start(recordId: Long?)
+        /**
+         * [recordId] 为 null 表示新增。
+         *
+         * [defaultDayMs] 只在新增时生效：表单里的时间默认落在这个自然日。
+         * 编辑已有记录时以记录自身的时间为准，传进来也没用。
+         */
+        fun start(recordId: Long?, defaultDayMs: Long)
 
         fun save(type: RecordType, amountInput: String, remark: String, time: Long)
 

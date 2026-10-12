@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  日历里的一格。三种粒度共用：上面一行是周期标签（日期数字 / `1月` / `2026`），
+  下面一行是结余，没有记录的格子只显示标签。
+
+  layout_weight 是相对所在行而言的，行由代码拼出来。
+  2dp margin 是相邻色块之间的缝——两块填色直接贴在一起，深浅就看不出边界了。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_margin="2dp"
+    android:layout_weight="1"
+    android:background="@drawable/bg_calendar_cell"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="2dp"
+    android:paddingVertical="4dp">
+
+    <!--
+      日期数字不用 textColorSecondary：它压在格子填色上，而填色最深的一档
+      和次级文字只有 2～3:1，11sp 的小字读起来发虚。用 colorOnSurface，
+      对比度经过验证（最差一档 5.15:1 / 深色 5.68:1），层级改由字号体现
+      ——两行的字号/字重差异见 styles.xml。
+    -->
+    <TextView
+        android:id="@+id/textLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Bookkeeping.CalendarDate"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="16" />
+
+    <TextView
+        android:id="@+id/textAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Bookkeeping.CalendarAmount"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="+150" />
+
+</LinearLayout>

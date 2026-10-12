@@ -13,28 +13,31 @@ class MainPresenter(context: Context) :
     private val appContext = context.applicationContext
     private val dao = RecordDao(appContext)
 
-    override fun loadRecords() {
-        val now = System.currentTimeMillis()
-        val todayStart = DateUtils.dayStart(now)
-        val todayEndExclusive = DateUtils.dayEndExclusive(now)
+    /**
+     * 当前查看的自然日，由 [loadRecords] 记下。
+     *
+     * 删除后要按同一天重查——删的是哪天的记录，视图就该留在哪天。
+     */
+    private var selectedDayMs: Long = DateUtils.dayStart(System.currentTimeMillis())
+
+    override fun loadRecords(dayMs: Long) {
+        selectedDayMs = dayMs
+        val dayStart = DateUtils.dayStart(dayMs)
+        val dayEndExclusive = DateUtils.dayEndExclusive(dayMs)
 
         runAsync(
-            task = {
-                val all = dao.queryAll()
-                val today = dao.queryBetween(todayStart, todayEndExclusive)
-                all to today
-            },
-            onSuccess = { (all, today) ->
+            task = { dao.queryBetween(dayStart, dayEndExclusive, descending = true) },
+            onSuccess = { records ->
                 var income = 0.0
                 var expense = 0.0
-                for (record in today) {
+                for (record in records) {
                     if (record.type == RecordType.INCOME) income += record.amount
                     else expense += record.amount
                 }
                 view?.let {
-                    it.showRecords(all)
+                    it.showRecords(records)
                     it.showSummary(income, expense)
-                    it.showEmpty(all.isEmpty())
+                    it.showEmpty(records.isEmpty())
                 }
             }
         )
@@ -44,9 +47,9 @@ class MainPresenter(context: Context) :
         runAsync(
             task = { dao.delete(id) },
             onSuccess = {
-                // 删除后整表重查：汇总和空态都要跟着变，局部移除反而容易漏更新
+                // 删除后整日重查：汇总和空态都要跟着变，局部移除反而容易漏更新
                 view?.showMessage(appContext.getString(R.string.deleted))
-                loadRecords()
+                loadRecords(selectedDayMs)
             }
         )
     }

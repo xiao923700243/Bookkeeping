@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      日历格子里两行字的层级。日期是「这是哪一天」的定位信息，退成小号说明文字；
+      结余是格子里的数据本体，放大一档。11sp 和 12sp 那对 M3 token 只差 1sp、
+      字重又都是 Medium，叠在一起会糊成一段，所以这里把差距拉开。
+
+      颜色两行都必须是 colorOnSurface：格子带热力填色，最深一档上只有它还够 4.5:1
+      （见 colors.xml），层级表达不了在颜色上，只能落在字号上。
+    -->
+    <style name="TextAppearance.Bookkeeping.CalendarDate"
+        parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="TextAppearance.Bookkeeping.CalendarAmount"
+        parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">13sp</item>
+    </style>
+</resources>

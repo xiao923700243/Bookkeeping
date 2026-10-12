@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  星期表头的一格。weight 和 margin 都跟 item_calendar_cell 保持一致，
+  表头文字才会正对着下面那一列格子。
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:layout_weight="1"
+    android:gravity="center"
+    android:textAppearance="?attr/textAppearanceLabelSmall"
+    android:textColor="?android:attr/textColorSecondary"
+    tools:text="一" />

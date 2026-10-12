@@ -19,9 +19,9 @@
         app:navigationIcon="@drawable/ic_back"
         app:title="@string/action_stats" />
 
-    <!-- Tab 在代码里按 StatsPeriod 顺序添加，保证 index 与枚举一一对应 -->
+    <!-- Tab 在代码里按 StatsScale 顺序添加，保证 index 与枚举一一对应 -->
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabPeriod"
+        android:id="@+id/tabScale"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -29,40 +29,110 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:tabMode="fixed" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardSummary"
+    <!--
+      Toolbar 以下整块用线性布局：日期翻页栏、星期表头、日历、汇总卡片自上而下堆。
+      每块都是内容多高就占多高，日历不再撑满剩余空间，多出来的空白留在最下面。
+      用 ConstraintLayout 也行，但这里全是顺序关系，线性布局读起来更直白。
+    -->
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
-        app:cardBackgroundColor="?attr/colorSurfaceVariant"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabPeriod">
+        app:layout_constraintTop_toBottomOf="@id/tabScale">
 
+        <!-- 翻页栏。右箭头翻到当前月/年时由 Activity 置灰并吞掉点击。 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+            <ImageButton
+                android:id="@+id/btnPrev"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_prev_period"
+                android:src="@drawable/ic_chevron_left" />
 
             <TextView
-                android:id="@+id/textRange"
+                android:id="@+id/textTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                tools:text="2026-10" />
+
+            <ImageButton
+                android:id="@+id/btnNext"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_next_period"
+                android:src="@drawable/ic_chevron_right" />
+        </LinearLayout>
+
+        <!-- 星期表头。只在日档显示，内容由代码填，好和网格的列宽严丝合缝地对齐。 -->
+        <LinearLayout
+            android:id="@+id/weekdayHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp" />
+
+        <!--
+          日历网格与空态提示叠在一起：空态盖在网格上，网格本身照常铺开。
+          高度取 wrap_content 而不是 weight=1：网格的行高是定值（见 renderGrid），
+          让它按内容撑开，多出来的空间留在下面，日历就不会随屏幕一起变大。
+        -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp" />
+
+            <TextView
+                android:id="@+id/textEmpty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:layout_gravity="center"
+                android:text="@string/empty_stats"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="2026-09-11 ~ 2026-10-10" />
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </FrameLayout>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <!-- 标签用通用的「总收入 / 总支出」，文案跟着顶部标题的区间走，
+                 写死「本月」的话翻到别的月份就错了 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:baselineAligned="false"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingVertical="12dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -135,34 +205,7 @@
                         tools:text="-2,280.00" />
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardSummary" />
-
-    <!-- 两条曲线都平在 0 时盖一层提示，避免用户对着空图表发懵 -->
-    <TextView
-        android:id="@+id/textChartEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/empty_stats"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?android:attr/textColorSecondary"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/lineChart"
-        app:layout_constraintEnd_toEndOf="@id/lineChart"
-        app:layout_constraintStart_toStartOf="@id/lineChart"
-        app:layout_constraintTop_toTopOf="@id/lineChart"
-        tools:visibility="gone" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

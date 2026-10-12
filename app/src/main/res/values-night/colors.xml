@@ -4,6 +4,17 @@
     <color name="income">#FF81C784</color>
     <color name="expense">#FFEF9A9A</color>
 
-    <color name="chart_grid">#33FFFFFF</color>
-    <color name="chart_axis_text">#99FFFFFF</color>
+    <!--
+      深色模式的日历热力色阶。同样的四档，但重新锚在近黑底上——亮度阶是「选」出来的，
+      不是把浅色值直接反过来，所以色值看起来完全不一样。浅色值见 values/colors.xml。
+    -->
+    <color name="heat_pos_1">#FF022204</color>
+    <color name="heat_pos_2">#FF09360D</color>
+    <color name="heat_pos_3">#FF124C16</color>
+    <color name="heat_pos_4">#FF1B6320</color>
+    <color name="heat_neg_1">#FF330A09</color>
+    <color name="heat_neg_2">#FF4E1714</color>
+    <color name="heat_neg_3">#FF6B2420</color>
+    <color name="heat_neg_4">#FF89312C</color>
+    <color name="heat_zero">#FF3A383D</color>
 </resources>

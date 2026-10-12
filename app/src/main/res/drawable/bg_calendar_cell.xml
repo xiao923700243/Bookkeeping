@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  日历格子的底。纯白只是个占位，真正的颜色是代码按热力档位 tint 上去的
+  （没有记录的格子直接 tint 成透明）。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="10dp" />
+    <solid android:color="@android:color/white" />
+</shape>

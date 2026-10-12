@@ -8,7 +8,22 @@
     <color name="balance_positive">@color/income</color>
     <color name="balance_negative">@color/expense</color>
 
-    <!-- 图表网格与坐标轴文字 -->
-    <color name="chart_grid">#1F000000</color>
-    <color name="chart_axis_text">#99000000</color>
+    <!--
+      日历热力色阶。结余有正负，所以是双向色阶：绿色臂走正数、红色臂走负数，
+      两臂的明度与彩度逐档对齐，中性灰留给「收支持平」。
+
+      值由 tools/heatmap_palette.py 算出并验证（明度单调、相邻档差 ≥ 0.06、
+      每档上 ?attr/colorOnSurface 文字对比度 ≥ 4.5:1）。改色请改脚本再重跑，
+      别手调——色阶是靠明度讲故事的，眼睛看不出相邻档差是不是掉了。
+      深色模式的对应色阶在 values-night/colors.xml。
+    -->
+    <color name="heat_pos_1">#FFDCEEDC</color>
+    <color name="heat_pos_2">#FFADD8AC</color>
+    <color name="heat_pos_3">#FF79C379</color>
+    <color name="heat_pos_4">#FF56A858</color>
+    <color name="heat_neg_1">#FFFCE1DD</color>
+    <color name="heat_neg_2">#FFF8B8B1</color>
+    <color name="heat_neg_3">#FFF48C82</color>
+    <color name="heat_neg_4">#FFDB6C63</color>
+    <color name="heat_zero">#FFE4E1E6</color>
 </resources>

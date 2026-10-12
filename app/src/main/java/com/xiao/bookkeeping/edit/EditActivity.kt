@@ -67,6 +67,8 @@ class EditActivity : AppCompatActivity(), EditContract.View {
         bindViews()
 
         val recordId = intent.getLongExtra(EXTRA_RECORD_ID, NO_ID).takeIf { it != NO_ID }
+        // 新增时表单时间默认落在这天；列表页没传就退回今天
+        val defaultDayMs = intent.getLongExtra(EXTRA_DEFAULT_DAY, System.currentTimeMillis())
         findViewById<MaterialToolbar>(R.id.toolbar).apply {
             title = getString(if (recordId == null) R.string.title_add else R.string.title_edit)
             setNavigationOnClickListener { finish() }
@@ -76,7 +78,7 @@ class EditActivity : AppCompatActivity(), EditContract.View {
         presenter.attach(this)
 
         if (savedInstanceState == null) {
-            presenter.start(recordId)
+            presenter.start(recordId, defaultDayMs)
         } else {
             // 配置变更后重建：金额/备注/类型这些控件内容由框架自动恢复，
             // selectedTime 是普通字段恢复不了，得自己补，否则界面显示的日期时间和实际入库的对不上。
@@ -258,13 +260,24 @@ class EditActivity : AppCompatActivity(), EditContract.View {
     companion object {
         private const val TAG = "EditActivity"
         private const val EXTRA_RECORD_ID = "extra_record_id"
+        private const val EXTRA_DEFAULT_DAY = "extra_default_day"
         private const val NO_ID = -1L
         private const val STATE_SELECTED_TIME = "state_selected_time"
 
-        /** [recordId] 传 null 表示新增。 */
-        fun start(context: Context, recordId: Long?) {
+        /**
+         * [recordId] 传 null 表示新增。
+         *
+         * [defaultDayMs] 只在新增时生效，决定表单里的时间默认落在哪个自然日——用户在
+         * 列表页翻到哪天，就该记哪天。编辑已有记录时以记录自身的时间为准，不用传。
+         */
+        fun start(
+            context: Context,
+            recordId: Long?,
+            defaultDayMs: Long = System.currentTimeMillis()
+        ) {
             val intent = Intent(context, EditActivity::class.java).apply {
                 if (recordId != null) putExtra(EXTRA_RECORD_ID, recordId)
+                putExtra(EXTRA_DEFAULT_DAY, defaultDayMs)
             }
             context.startActivity(intent)
         }

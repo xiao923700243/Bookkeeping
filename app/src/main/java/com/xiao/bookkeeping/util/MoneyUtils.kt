@@ -22,6 +22,19 @@ object MoneyUtils {
             String.format(Locale.CHINA, "%.2f", amount)
         }
 
+    /**
+     * 缩略金额，给日历格子这种窄地方用。
+     *
+     * 天档的格子只有屏幕宽度的 1/7，`1,234.00` 这种完整格式塞不下。整元就够看，
+     * 上万换算成「万」——兼职一天几十到几百，偶尔过万，两档足够覆盖。
+     */
+    fun formatCompact(amount: Double): String =
+        if (amount >= WAN) {
+            String.format(Locale.CHINA, "%.1f万", amount / WAN)
+        } else {
+            Math.round(amount).toString()
+        }
+
     /** 带方向的展示形式：收入前缀 `+`，支出前缀 `-`。 */
     fun formatSigned(amount: Double, type: RecordType): String =
         (if (type == RecordType.INCOME) "+" else "-") + format(amount)
@@ -45,4 +58,6 @@ object MoneyUtils {
             ?.takeIf { it > 0 }
 
     private fun roundToCent(value: Double): Double = Math.round(value * 100) / 100.0
+
+    private const val WAN = 10_000.0
 }

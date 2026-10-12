@@ -44,7 +44,8 @@ class RecordAdapter(
             textRemark.text = record.remark.ifBlank {
                 context.getString(if (isIncome) R.string.type_income else R.string.type_expense)
             }
-            textDateTime.text = DateUtils.formatDateTime(record.time)
+            // 列表已按天筛过，日期由顶部卡片给出，这里只留时分
+            textDateTime.text = DateUtils.formatTime(record.time)
             textAmount.text = MoneyUtils.formatSigned(record.amount, record.type)
             textAmount.setTextColor(
                 ContextCompat.getColor(

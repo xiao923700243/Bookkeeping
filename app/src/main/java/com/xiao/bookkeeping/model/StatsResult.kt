@@ -1,58 +1,22 @@
 package com.xiao.bookkeeping.model
 
 /**
- * 统计结果：与 [buckets] 一一对应的收入/支出两条曲线，外加整个窗口的汇总。
+ * 一页日历：网格里的格子、这一页的汇总，以及能不能继续翻页。
  *
- * 曲线数组用 Float 是为了直接喂给图表库，汇总用 Double 避免累加精度损失。
+ * [cells] 里的 null 是占位空格。天档一个月往往不是整周，首尾得补齐列才对得上星期。
  */
 data class StatsResult(
-    val labels: List<String>,
-    val income: List<Float>,
-    val expense: List<Float>,
+    val scale: StatsScale,
+    /** 页标题：天档 `2026-10`、月档 `2026`、年档 `2024 ~ 2026`。 */
+    val title: String,
+    val cells: List<CalendarCell?>,
     val totalIncome: Double,
-    val totalExpense: Double
+    val totalExpense: Double,
+    val canGoPrev: Boolean,
+    val canGoNext: Boolean
 ) {
     val balance: Double get() = totalIncome - totalExpense
 
-    companion object {
-        /** 把 [records] 按 [buckets] 分桶求和；没有记录的桶留 0。 */
-        fun of(buckets: List<Bucket>, records: List<Record>): StatsResult {
-            val income = DoubleArray(buckets.size)
-            val expense = DoubleArray(buckets.size)
-
-            for (record in records) {
-                val index = buckets.indexOfBucket(record.time)
-                if (index < 0) continue
-                if (record.type == RecordType.INCOME) {
-                    income[index] += record.amount
-                } else {
-                    expense[index] += record.amount
-                }
-            }
-
-            return StatsResult(
-                labels = buckets.map { it.label },
-                income = income.map { it.toFloat() },
-                expense = expense.map { it.toFloat() },
-                totalIncome = income.sum(),
-                totalExpense = expense.sum()
-            )
-        }
-
-        /** 桶区间连续且有序，二分定位，避免对每条记录逐桶扫描。 */
-        private fun List<Bucket>.indexOfBucket(time: Long): Int {
-            var lo = 0
-            var hi = size - 1
-            while (lo <= hi) {
-                val mid = (lo + hi) ushr 1
-                val bucket = this[mid]
-                when {
-                    time < bucket.startMs -> hi = mid - 1
-                    time >= bucket.endMs -> lo = mid + 1
-                    else -> return mid
-                }
-            }
-            return -1
-        }
-    }
+    /** 整页一条记录都没有。此时不画热力，给空态提示。 */
+    val isEmpty: Boolean get() = totalIncome <= 0.0 && totalExpense <= 0.0
 }

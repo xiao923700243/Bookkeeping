@@ -6,6 +6,7 @@ import com.xiao.bookkeeping.base.BasePresenter
 import com.xiao.bookkeeping.model.Record
 import com.xiao.bookkeeping.model.RecordDao
 import com.xiao.bookkeeping.model.RecordType
+import com.xiao.bookkeeping.util.DateUtils
 import com.xiao.bookkeeping.util.MoneyUtils
 
 class EditPresenter(context: Context) :
@@ -20,7 +21,7 @@ class EditPresenter(context: Context) :
     /** 保存是否在途。写库完成前再点保存直接忽略，避免连点插入重复记录。 */
     private var saving = false
 
-    override fun start(recordId: Long?) {
+    override fun start(recordId: Long?, defaultDayMs: Long) {
         editingId = recordId ?: 0L
 
         if (editingId == 0L) {
@@ -31,7 +32,7 @@ class EditPresenter(context: Context) :
                     type = RecordType.INCOME,
                     amount = "",
                     remark = "",
-                    time = System.currentTimeMillis()
+                    time = defaultTimeOn(defaultDayMs)
                 )
             )
             return
@@ -107,6 +108,29 @@ class EditPresenter(context: Context) :
                 view?.showMessage(appContext.getString(R.string.deleted))
                 view?.close()
             }
+        )
+    }
+
+    /**
+     * 新增时的默认发生时间：落在 [defaultDayMs] 那一天，时分沿用此刻。
+     *
+     * 用户在列表页翻到 10-09 再点新增，意图就是「补记 10-09 的事」。
+     * 落到今天等于让他进去再手动改一次日期——记完返回还看不到，因为列表停在 10-09。
+     *
+     * 沿用时分而不是清零，理由同 `EditActivity.shiftDateTo`：改日期时通常不想连
+     * 时间一起改，把时分重置成 00:00 反而要再改一次。
+     */
+    private fun defaultTimeOn(defaultDayMs: Long): Long {
+        val now = System.currentTimeMillis()
+        // 今天就用此刻本身，不必把秒和毫秒抹掉
+        if (DateUtils.dayStart(defaultDayMs) == DateUtils.dayStart(now)) return now
+
+        return DateUtils.of(
+            DateUtils.yearOf(defaultDayMs),
+            DateUtils.monthOf(defaultDayMs),
+            DateUtils.dayOf(defaultDayMs),
+            DateUtils.hourOf(now),
+            DateUtils.minuteOf(now)
         )
     }
 

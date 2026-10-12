@@ -1,15 +1,14 @@
 package com.xiao.bookkeeping.stats
 
 import com.xiao.bookkeeping.base.BaseView
-import com.xiao.bookkeeping.model.StatsPeriod
 import com.xiao.bookkeeping.model.StatsResult
+import com.xiao.bookkeeping.model.StatsScale
 
 /** 统计页的 MVP 契约。 */
 interface StatsContract {
 
     interface View : BaseView {
-        /** [rangeText] 是当前窗口的日期区间文案，如 `2026-09-11 ~ 2026-10-10`。 */
-        fun showStats(result: StatsResult, rangeText: String)
+        fun showStats(result: StatsResult)
 
         fun showMessage(message: String)
     }
@@ -19,6 +18,7 @@ interface StatsContract {
 
         fun detach()
 
-        fun loadStats(period: StatsPeriod)
+        /** 加载 [scale] 粒度下 [anchor] 所在的那一页日历。 */
+        fun loadStats(scale: StatsScale, anchor: Long)
     }
 }

@@ -2,6 +2,7 @@ package com.xiao.bookkeeping.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Calendar
@@ -109,6 +110,77 @@ class DateUtilsTest {
 
         assertEquals(Calendar.MARCH, end.get(Calendar.MONTH))
         assertEquals(1, end.get(Calendar.DAY_OF_MONTH))
+    }
+
+    @Test
+    fun `days ago counts today yesterday and the day before`() {
+        val now = at(2026, Calendar.OCTOBER, 10, 15, 30)
+
+        assertEquals(0, DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 10, 9, 0), now))
+        assertEquals(1, DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 9, 9, 0), now))
+        assertEquals(2, DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 8, 9, 0), now))
+    }
+
+    @Test
+    fun `days ago ignores the time of day`() {
+        // 同一天的 00:00 和 23:59 都算「今天」，否则日期栏会在半夜跳成「昨天」
+        val now = at(2026, Calendar.OCTOBER, 10, 15, 30)
+
+        assertEquals(0, DateUtils.daysAgo(DateUtils.of(2026, Calendar.OCTOBER, 10, 0, 0), now))
+        assertEquals(0, DateUtils.daysAgo(DateUtils.of(2026, Calendar.OCTOBER, 10, 23, 59), now))
+    }
+
+    @Test
+    fun `days ago returns null beyond the limit`() {
+        val now = at(2026, Calendar.OCTOBER, 10, 15, 30)
+
+        assertNull(DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 7, 9, 0), now))
+        assertNull(DateUtils.daysAgo(at(2026, Calendar.JANUARY, 1, 9, 0), now))
+    }
+
+    @Test
+    fun `days ago returns null for a future day`() {
+        // 日期栏靠右箭头禁用挡住未来，但它仍要能回答「明天是几天前」= 不是
+        val now = at(2026, Calendar.OCTOBER, 10, 15, 30)
+
+        assertNull(DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 11, 9, 0), now))
+        assertNull(DateUtils.daysAgo(at(2026, Calendar.OCTOBER, 13, 9, 0), now))
+    }
+
+    @Test
+    fun `days ago crosses month and year boundaries`() {
+        assertEquals(
+            1,
+            DateUtils.daysAgo(
+                at(2026, Calendar.OCTOBER, 31, 20, 0),
+                at(2026, Calendar.NOVEMBER, 1, 9, 0)
+            )
+        )
+        assertEquals(
+            1,
+            DateUtils.daysAgo(
+                at(2026, Calendar.DECEMBER, 31, 20, 0),
+                at(2027, Calendar.JANUARY, 1, 9, 0)
+            )
+        )
+    }
+
+    @Test
+    fun `days ago survives days that are not 24 hours long`() {
+        // 夏令时切换那天只有 23（或 25）小时。实现用 plusDays 逐日比对而不是毫秒相除，
+        // 这里扫一整年，把默认时区的切换点都盖进去
+        val now = at(2026, Calendar.JANUARY, 1, 12, 0)
+
+        for (offset in 0 until 365) {
+            val day = DateUtils.plusDays(now, offset)
+            for (back in 0..2) {
+                assertEquals(
+                    "第 $offset 天往前 $back 天",
+                    back,
+                    DateUtils.daysAgo(DateUtils.plusDays(day, -back), day)
+                )
+            }
+        }
     }
 
     private fun at(year: Int, month: Int, day: Int, hour: Int, minute: Int): Long =
