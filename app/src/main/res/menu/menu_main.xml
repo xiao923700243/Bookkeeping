@@ -7,4 +7,18 @@
         android:icon="@drawable/ic_stats"
         android:title="@string/action_stats"
         app:showAsAction="ifRoom" />
+
+    <!--
+      导出和导入收进溢出菜单：统计已经占了 ifRoom，再加两个图标会把标题挤没。
+      溢出菜单不显示图标，所以这两项不用配矢量图。
+    -->
+    <item
+        android:id="@+id/action_export"
+        android:title="@string/action_export"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_import"
+        android:title="@string/action_import"
+        app:showAsAction="never" />
 </menu>

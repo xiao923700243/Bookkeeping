@@ -10,8 +10,16 @@ enum class RecordType(val code: Int) {
     INCOME(1);
 
     companion object {
-        fun fromCode(code: Int): RecordType =
-            values().firstOrNull { it.code == code } ?: EXPENSE
+        /** 未知 code 一律当支出——只有库里的脏数据会走到这里，读出来总比读不出来强。 */
+        fun fromCode(code: Int): RecordType = fromCodeOrNull(code) ?: EXPENSE
+
+        /**
+         * 严格版：未知 code 返回 null。
+         *
+         * 备份导入必须用这个版本：外面来的文件不该被静默兜底成支出，
+         * 那样坏数据会当成正经账目写进库。
+         */
+        fun fromCodeOrNull(code: Int): RecordType? = values().firstOrNull { it.code == code }
     }
 }
 

@@ -1,6 +1,7 @@
 package com.xiao.bookkeeping
 
 import android.app.DatePickerDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -44,6 +46,34 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     /** 正在查看的自然日，恒为当天 00:00。默认今天，由箭头切换。 */
     private var selectedDay: Long = DateUtils.dayStart(System.currentTimeMillis())
+
+    /**
+     * 导出：让用户挑保存位置。
+     *
+     * 用系统文件选择器（SAF）而不是自己往公共目录里写文件——用户选中的位置由系统
+     * 按 URI 一次性授权，不需要任何存储权限，还能直接存进网盘。
+     *
+     * 注册必须早于 Activity 进入 STARTED，所以放在属性初始化里，别挪进点击回调。
+     */
+    private val exportLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument(MIME_JSON)
+    ) { uri ->
+        // 用户在选择器里按返回时 uri 是 null
+        uri?.let { presenter.exportBackup(it) }
+    }
+
+    /**
+     * 导入：不过滤文件类型，让用户能选中自己的备份。
+     *
+     * 转存过、从聊天软件里存下来的 JSON 常被标成 octet-stream 或者干脆没有类型，
+     * 按 json 过滤反而会让文件在选择器里根本看不见。真正的把关是文件里的
+     * format 和 version 字段，见 BackupCodec。
+     */
+    private val importLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { presenter.prepareImport(it) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,12 +154,48 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.menu_main)
         toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_stats) {
-                startActivity(Intent(this, StatsActivity::class.java))
-                true
-            } else {
-                false
+            when (item.itemId) {
+                R.id.action_stats -> {
+                    startActivity(Intent(this, StatsActivity::class.java))
+                    true
+                }
+
+                R.id.action_export -> {
+                    launchExport()
+                    true
+                }
+
+                R.id.action_import -> {
+                    launchImport()
+                    true
+                }
+
+                else -> false
             }
+        }
+    }
+
+    /** 让用户挑个位置把整本账存出来。 */
+    private fun launchExport() {
+        // 建议名带上今天：用户攒了几份备份时，光看名字就能认出哪份是哪份
+        val defaultName = getString(
+            R.string.backup_file_name,
+            DateUtils.formatDate(System.currentTimeMillis())
+        )
+        try {
+            exportLauncher.launch(defaultName)
+        } catch (e: ActivityNotFoundException) {
+            // 极少数精简系统上没有任何文件选择器
+            showMessage(getString(R.string.backup_error_no_picker))
+        }
+    }
+
+    /** 让用户挑一份备份文件。选完先整份校验，通过了才弹覆盖确认。 */
+    private fun launchImport() {
+        try {
+            importLauncher.launch(arrayOf(MIME_ANY))
+        } catch (e: ActivityNotFoundException) {
+            showMessage(getString(R.string.backup_error_no_picker))
         }
     }
 
@@ -284,9 +350,31 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             .show()
     }
 
+    override fun confirmImport(fileName: String, count: Int, exportedAt: Long) {
+        val time = DateUtils.formatDateTime(exportedAt)
+        // 空备份会把账本清空，单独一句说清楚，别混在「共 0 条记录」里滑过去
+        val message = if (count == 0) {
+            getString(R.string.backup_import_confirm_message_empty, fileName, time)
+        } else {
+            getString(R.string.backup_import_confirm_message, fileName, time, count)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.backup_import_confirm_title)
+            .setMessage(message)
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.action_import_confirm) { _, _ -> presenter.commitImport() }
+            .show()
+    }
+
     companion object {
         private const val STATE_SELECTED_DAY = "state_selected_day"
         private const val EXTRA_DAY = "extra_day"
+
+        /** 导出时的建议类型。用户仍能在选择器里改名改成别的后缀。 */
+        private const val MIME_JSON = "application/json"
+
+        /** 导入不过滤类型，理由见 importLauncher 的注释。 */
+        private const val MIME_ANY = "*/*"
 
         /** 右箭头不可用时的透明度，跟 Material 的 disabled 观感对齐。 */
         private const val ALPHA_DISABLED = 0.38f
